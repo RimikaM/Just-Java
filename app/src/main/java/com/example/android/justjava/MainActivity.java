@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    int quantity = 0;
+
     /* app displays an order form to order coffee */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,21 +20,19 @@ public class MainActivity extends AppCompatActivity {
 
     /* method called when order button is clicked */
     public void submitOrder(View view) {
-        int numberOfCoffees = 2;
-        display(numberOfCoffees);
-        displayPrice(numberOfCoffees*5);
+        displayPrice(quantity*5);
     }
 
+    /* method called when plus button is clicked */
     public void increment (View view) {
-        int quantity = 3;
+        quantity += 1;
         display(quantity);
-        displayPrice(quantity);
     }
 
+    /* method called when minus button is clicked */
     public void decrement (View view) {
-        int quantity = 1;
+        quantity -= 1;
         display(quantity);
-        displayPrice(quantity);
     }
 
     /* method displays the given quantity values */
