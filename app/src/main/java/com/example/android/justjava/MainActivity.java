@@ -1,11 +1,15 @@
 package com.example.android.justjava;
 
 import android.icu.text.NumberFormat;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.CheckBox;
+import android.text.Editable;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,31 +24,83 @@ public class MainActivity extends AppCompatActivity {
 
     /* method called when order button is clicked */
     public void submitOrder(View view) {
-        int price = quantity * 5;
-        String priceMessage = "Total: $" + price;
-        priceMessage = priceMessage + "\nThank you!";
-        calculatePrice(quantity);
+        // Get user's name
+        EditText nameField = (EditText) findViewById(R.id.name_field);
+        Editable nameEditable = nameField.getText();
+        String name = nameEditable.toString();
+
+        // Figure out if the user wants whipped cream topping
+        CheckBox whippedCreamCheckBox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
+        boolean hasWhippedCream = whippedCreamCheckBox.isChecked();
+
+        // Figure out if the user wants choclate topping
+        CheckBox chocolateCheckBox = (CheckBox) findViewById(R.id.chocolate_checkbox);
+        boolean hasChocolate = chocolateCheckBox.isChecked();
+
+        // Calculate the price
+        int price = calculatePrice(hasWhippedCream, hasChocolate);
+
+        // Display the order summary on the screen
+        String message = createOrderSummary(name, price, hasWhippedCream, hasChocolate);
+
+        // Use an intent to launch an email app.
+        // Send the order summary in the email body.
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_SUBJECT,
+                getString(R.string.order_summary_email_subject, name));
+        intent.putExtra(Intent.EXTRA_TEXT, message);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /* method called when plus button is clicked */
     public void increment (View view) {
+        if (quantity == 100) {
+            return;
+        }
         quantity += 1;
         displayQuantity(quantity);
     }
 
     /* method called when minus button is clicked */
     public void decrement (View view) {
+        if (quantity == 0) {
+            return;
+        }
         quantity -= 1;
         displayQuantity(quantity);
     }
 
-    /**
-     * Calculates the price of the order.
-     *
-     * @param quantity is the number of cups of coffee ordered
-     */
-    private void calculatePrice(int quantity) {
-        int price = quantity * 5;
+    /* Calculates the price of the order */
+    private int calculatePrice(boolean addWhippedCream, boolean addChocolate) {
+        // calculate the price of one cup of coffee
+        int basePrice = 5;
+
+        // add $1 to base price per cup
+        if (addWhippedCream) {
+            basePrice += 1;
+        }
+
+        // add $2 to base price per cup
+        if (addChocolate) {
+            basePrice += 2;
+        }
+
+        return quantity * basePrice;
+    }
+
+    private String createOrderSummary(String name, int price, boolean addWhippedCream, boolean addChocolate) {
+        String priceMessage = getString(R.string.order_summary_name, name);
+        priceMessage += "\n" + getString(R.string.order_summary_whipped_cream, addWhippedCream);
+        priceMessage += "\n" + getString(R.string.order_summary_chocolate, addChocolate);
+        priceMessage += "\n" + getString(R.string.order_summary_quantity, quantity);
+        priceMessage += "\n" + getString(R.string.order_summary_price,
+                NumberFormat.getCurrencyInstance().format(price));
+        priceMessage += "\n" + getString(R.string.thank_you);
+        return priceMessage;
     }
 
     /* method displays the given quantity values */
