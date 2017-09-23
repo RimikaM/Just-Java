@@ -22,6 +22,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+
+    /* method called when plus button is clicked */
+    public void increment (View view) {
+        if (quantity == 100) {
+            return;
+        }
+        quantity += 1;
+        displayQuantity(quantity);
+    }
+
+    /* method called when minus button is clicked */
+    public void decrement (View view) {
+        if (quantity == 0) {
+            return;
+        }
+        quantity -= 1;
+        displayQuantity(quantity);
+    }
+
     /* method called when order button is clicked */
     public void submitOrder(View view) {
         // Get user's name
@@ -42,39 +61,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Display the order summary on the screen
         String message = createOrderSummary(name, price, hasWhippedCream, hasChocolate);
-
-        // Use an intent to launch an email app.
-        // Send the order summary in the email body.
-        Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_SUBJECT,
-                getString(R.string.order_summary_email_subject, name));
-        intent.putExtra(Intent.EXTRA_TEXT, message);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
+        displayOrder(message);
     }
 
-    /* method called when plus button is clicked */
-    public void increment (View view) {
-        if (quantity == 100) {
-            return;
-        }
-        quantity += 1;
-        displayQuantity(quantity);
-    }
-
-    /* method called when minus button is clicked */
-    public void decrement (View view) {
-        if (quantity == 0) {
-            return;
-        }
-        quantity -= 1;
-        displayQuantity(quantity);
-    }
-
-    /* Calculates the price of the order */
+    /* method calculates the price of the order */
     private int calculatePrice(boolean addWhippedCream, boolean addChocolate) {
         // calculate the price of one cup of coffee
         int basePrice = 5;
@@ -92,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         return quantity * basePrice;
     }
 
+    /* method puts together the user's order on the coffee */
     private String createOrderSummary(String name, int price, boolean addWhippedCream, boolean addChocolate) {
         String priceMessage = getString(R.string.order_summary_name, name);
         priceMessage += "\n" + getString(R.string.order_summary_whipped_cream, addWhippedCream);
@@ -101,6 +92,13 @@ public class MainActivity extends AppCompatActivity {
                 NumberFormat.getCurrencyInstance().format(price));
         priceMessage += "\n" + getString(R.string.thank_you);
         return priceMessage;
+    }
+
+    /* method displays the user's order */
+    private void displayOrder(String message) {
+        TextView orderTextView = (TextView)
+                findViewById(R.id.order_text_view);
+        orderTextView.setText(message);
     }
 
     /* method displays the given quantity values */
